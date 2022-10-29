@@ -1,0 +1,12 @@
+{{{ phpOpenTag }}}
+
+namespace {{baseNamespace}}{{namespace}};
+
+{{# imports}}
+use {{baseNamespace}}{{.}};
+{{/imports}}
+
+interface {{className}}
+{
+    public function __invoke({{#requestParams}}{{type}} ${{name}}, {{/requestParams}}{{#requestBody}}{{type}} ${{name}}{{/requestBody}}): {{responseType}};
+}

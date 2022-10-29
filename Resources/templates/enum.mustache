@@ -1,0 +1,10 @@
+{{{ phpOpenTag }}}
+
+namespace {{baseNamespace}}{{namespace}};
+
+enum {{className}}: {{type}}
+{
+    {{#enums}}
+    case {{name}} = {{#isString}}'{{/isString}}{{value}}{{#isString}}'{{/isString}};
+    {{/enums}}
+}
