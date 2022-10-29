@@ -10,8 +10,8 @@ class TypeResolver
     private function getPhpType(string $type, string $format): string
     {
         return match ($type) {
-            'number' => 'float',
-            'integer' => 'int',
+            'number', 'float' => 'float',
+            'int', 'integer' => 'int',
             'boolean' => 'bool',
             'array', 'object' => 'array',
             'string' => match (true) {
@@ -24,6 +24,12 @@ class TypeResolver
 
     public function getType(Reference|Schema $schema, string $name): string
     {
+        if (!($schema instanceof Reference) && $schema->type === null) {
+            echo "Type not set on $name defaulting to string\n";
+            $schema->type = 'string';
+
+        }
+
         return match (true) {
             $schema instanceof Reference => $this->getModelNameFromRef($schema->getReference()),
             !empty($schema->enum) => 'Enum\\' . ucfirst($name),
@@ -36,8 +42,31 @@ class TypeResolver
                     )
                 )
             ),
-            default => $this->getPhpType($schema->type, $schema->format ?? '')
+            default => $this->getPhpType($this->getSchemaType($schema->type), $this->getFormat($schema->format))
         };
+    }
+
+    private function getSchemaType(mixed $type): string {
+        if (is_string($type)) {
+            return  $type;
+        } elseif (is_array($type)) {
+            echo "Converting type as array to first string of first array element: " . json_encode($type) ."\n";
+            return  reset($type);
+        }
+        else {
+            return  '';
+        }
+    }
+    private function getFormat(mixed $format): string
+    {
+        if (is_array($format)) {
+            echo "Using first array value as type: " . json_encode($format) ."\n";
+            return reset($format);
+        } elseif (is_string($format)) {
+            return $format;
+        } else {
+            return '';
+        }
     }
 
     public function getArrayDocType(Schema|Reference $schema): string
@@ -49,11 +78,10 @@ class TypeResolver
         };
     }
 
-
     private function getModelNameFromRef(string $ref): string
     {
         $refParts = explode('/', $ref);
 
-        return end($refParts);
+        return ucfirst(str_replace('.json', '', end($refParts)));
     }
 }

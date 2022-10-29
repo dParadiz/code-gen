@@ -2,7 +2,7 @@
 
 namespace Dparadiz\Codegen;
 
-class ModelProperty
+final class ModelProperty
 {
     public string $name;
     public string $type;

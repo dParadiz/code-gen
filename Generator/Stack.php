@@ -1,6 +1,6 @@
 <?php
 
-namespace Dparadiz\Codegen;
+namespace Dparadiz\Codegen\Generator;
 
 final class Stack
 {

@@ -10,7 +10,6 @@ return function (RoutingConfigurator $routes) {
     $routes->add('api_{{operationId}}', '{{path}}')
        ->defaults([
             'handler' => '{{handler}}',
-            'stack' => 'api'
         ])
         ->methods(['{{method}}']);
 

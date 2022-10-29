@@ -7,10 +7,10 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Exception\MissingConstructorArgumentsException;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use {{baseNamespace}}Deserializer;
-{{# imports}}
-use {{baseNamespace}}{{.}};
-{{/imports}}
+use Product\Http\Exception\BadRequest;
+use Product\Http\Pipeline\Deserializer;
+use {{baseNamespace}}Parameter;
+use {{baseNamespace}}Model;
 
 class {{className}} implements Deserializer
 {

@@ -101,6 +101,7 @@ class PropertyDataMapper
         if ($modelProperty->type === 'array') {
             $type = str_replace('[]', '', $modelProperty->docType);
             $type = str_replace(self::NULL_PREFIX, '', $type);
+            $type = str_replace('.json', '', $type);
             //$type = str_replace('|', '', $type);
             $attributes[] = 'Assert\\Valid';
             // strip out null prefix since validator will not work correctly

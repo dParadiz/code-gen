@@ -4,15 +4,16 @@
  * !!! auto generated - do not modify !!!
  */
 return [
+    Product\Http\Pipeline\JsonSerializer::class => DI\autowire(),
     {{#services}}
     {{baseNamespace}}{{.}}::class => DI\autowire(),
     {{/services}}
     {{#routes}}
-    '{{handler}}' => fn(Psr\Container\ContainerInterface $c) => new {{baseNamespace}}PipelineHandler(
-        new {{baseNamespace}}Pipeline([
-            {{#deserializer}}$c->get({{baseNamespace}}{{.}}::class),{{/deserializer}}
+    '{{handler}}' => fn(Psr\Container\ContainerInterface $c) => new Product\Http\Handler\PipelineHandler(
+        new Product\Http\Pipeline([
+            {{#deserializer}}$c->get({{baseNamespace}}{{.}}::class),{{/deserializer}}{{^deserializer}}$c->get(Product\Http\Pipeline\EmptyDeserializer::class),{{/deserializer}}
             $c->get({{baseNamespace}}{{operation}}::class),
-            {{#serializer}}$c->get({{baseNamespace}}{{.}}::class),{{/serializer}}
+             $c->get(Product\Http\Pipeline\JsonSerializer::class),
         ])
     ),
     {{/routes}}
