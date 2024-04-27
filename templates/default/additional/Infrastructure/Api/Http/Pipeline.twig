@@ -1,0 +1,39 @@
+<?php declare(strict_types=1);
+
+namespace {{baseNamespace}}Infrastructure\Api\Http;
+
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
+final class Pipeline
+{
+    private array $pipeline = [];
+
+    public function __construct(array $steps = [])
+    {
+        foreach ($steps as $step) {
+            $this->addStep($step);
+        }
+    }
+
+    public function addStep(callable $step): self
+    {
+        $this->pipeline[] = $step;
+
+        return $this;
+    }
+
+    public function execute(ServerRequestInterface $request): ResponseInterface
+    {
+        $payload = [$request];
+
+        foreach ($this->pipeline as $step) {
+            $payload = $step(...$payload);
+            if (!is_array($payload)) {
+                $payload = [$payload];
+            }
+        }
+
+        return reset($payload);
+    }
+}

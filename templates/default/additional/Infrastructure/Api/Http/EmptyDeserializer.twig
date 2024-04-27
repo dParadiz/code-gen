@@ -1,0 +1,13 @@
+<?php declare(strict_types=1);
+
+namespace {{baseNamespace}}Infrastructure\Api\Http;
+
+use Psr\Http\Message\ServerRequestInterface;
+
+class EmptyDeserializer
+{
+    public function __invoke(ServerRequestInterface $request): array
+    {
+        return [];
+    }
+}

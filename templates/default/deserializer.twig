@@ -1,5 +1,4 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace {{baseNamespace}}{{namespace}};
 
@@ -8,12 +7,9 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Exception\MissingConstructorArgumentsException;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use {{baseNamespace}}Http\Exception\BadRequest;
-use {{baseNamespace}}Http\Pipeline\Deserializer;
-use {{baseNamespace}}Parameter;
-use {{baseNamespace}}Model;
+use {{baseNamespace}}Infrastructure\Api\Http\Exception\BadRequest;
 
-class {{className}} implements Deserializer
+class {{className}}
 {
     public function __construct(
         private ValidatorInterface $validator,{% if requestBody %}
@@ -42,7 +38,11 @@ class {{className}} implements Deserializer
         {% if requestBody %}
 
         try {
-            $model = $this->serializer->deserialize($request->getBody()->getContents(), {{requestBody}}::class, 'json');
+            $model = $this->serializer->deserialize(
+                $request->getBody()->getContents(), 
+                \{{baseNamespace}}{{requestBody}}::class, 
+                'json'
+            );
         } catch (MissingConstructorArgumentsException|NotEncodableValueException $e) {
             throw new BadRequest('Missing required data');
         }

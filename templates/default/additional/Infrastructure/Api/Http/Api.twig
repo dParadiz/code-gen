@@ -1,0 +1,53 @@
+<?php declare(strict_types=1);
+
+namespace {{baseNamespace}}Infrastructure\Api\Http;
+
+use Psr\Container\ContainerInterface;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use GuzzleHttp\Psr7\Response;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
+use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\RouterInterface;
+use {{baseNamespace}}Infrastructure\Api\Http\Exception\BadRequest;
+
+
+class Api
+{
+    public function __construct(
+        private ContainerInterface $di,
+        private RouterInterface    $router,
+        private EmitterInterface   $emitter
+    ) {
+    }
+
+    public function handle(RequestInterface|ServerRequestInterface $request): void
+    {
+        try {
+            $this->router->setContext(new RequestContext('', method: $request->getMethod()));
+            $parameters = $this->router->match($request->getUri()->getPath());
+        } catch (BadRequest $e) {
+            $errorResponse = new Response(400, [], 'Bad request');
+            $this->emitter->emit($errorResponse);
+
+            return;
+       } catch (RouteNotFoundException|ResourceNotFoundException|MethodNotAllowedException $e) {         
+            $errorResponse = new Response(404, [], 'Not found');
+            $this->emitter->emit($errorResponse);
+
+            return;
+        }
+
+        $handler = $this->di->get($parameters['handler']);
+
+        $serverRequestHandler = new MiddlewareHandler($handler);
+        $serverRequestHandler->withMiddleware(new Middleware\ExceptionHandling());
+
+        $response = $serverRequestHandler->handle($request);
+
+        $this->emitter->emit($response);
+    }
+   
+}

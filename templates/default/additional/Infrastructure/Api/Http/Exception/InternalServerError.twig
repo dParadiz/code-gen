@@ -1,0 +1,12 @@
+<?php declare(strict_types=1);
+
+namespace {{baseNamespace}}Infrastructure\Api\Http\Exception;
+
+class InternalServerError extends HttpException
+{
+    /** @var string */
+    protected $message = 'Internal server error';
+
+    /** @var int */
+    protected $code = 500;
+}

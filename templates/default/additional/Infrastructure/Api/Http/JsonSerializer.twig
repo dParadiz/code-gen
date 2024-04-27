@@ -1,0 +1,11 @@
+<?php declare(strict_types=1);
+
+namespace {{baseNamespace}}Infrastructure\Api\Http;
+
+class JsonSerializer
+{
+    public function __invoke(mixed $input): string
+    {
+        return json_encode($input);
+    }
+}

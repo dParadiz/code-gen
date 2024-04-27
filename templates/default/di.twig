@@ -4,19 +4,49 @@
 * !!! auto generated - do not modify !!!
 */
 return [
-{{baseNamespace}}Http\Pipeline\JsonSerializer::class => DI\autowire(),
+    Symfony\Component\Routing\RouterInterface::class => fn () => new Symfony\Component\Routing\Router(
+        new Symfony\Component\Routing\Loader\PhpFileLoader(new Symfony\Component\Config\FileLocator(__DIR__ . '/../')),
+        'routes.php',
+        [
+            'cache_dir' => __DIR__ . '/../../var/routes',
+        ],
+        new Symfony\Component\Routing\RequestContext()
+    ),
+    Symfony\Component\Serializer\Serializer::class => fn () => new Symfony\Component\Serializer\Serializer(
+        [
+            new Symfony\Component\Serializer\Normalizer\DateTimeNormalizer(),
+            new Symfony\Component\Serializer\Normalizer\ObjectNormalizer(
+                null,
+                null,
+                null,
+                new Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor(),
+                null,
+                null,
+                [
+                    Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
+                ]
+            ),
+            new Symfony\Component\Serializer\Normalizer\ArrayDenormalizer(),
+        ],
+        [new Symfony\Component\Serializer\Encoder\JsonEncoder()]
+    ),
+    Symfony\Component\Validator\Validator\ValidatorInterface::class => fn () => Symfony\Component\Validator\Validation::createValidatorBuilder()
+        ->getValidator(),
+    {{baseNamespace}}Infrastructure\Api\Http\EmitterInterface::class => DI\autowire({{baseNamespace}}Infrastructure\Api\Http\Emitter::class),
+    {{baseNamespace}}Infrastructure\Api\Http\Api::class => DI\autowire(),
+    {{baseNamespace}}Http\Pipeline\JsonSerializer::class => DI\autowire(),
 {% for service in services %}
-    {{baseNamespace}}{{ services }}::class => DI\autowire(),
+    {{baseNamespace}}{{ service }}::class => DI\autowire(),
 {% endfor %}
 {% for route in routes %}
 
-    '{{ route.handler }}' => fn(Psr\Container\ContainerInterface $c) => new {{baseNamespace}}Http\Handler\PipelineHandler(
-    new {{ baseNamespace }}\Http\Pipeline([
+    '{{ route.handler }}' => fn(Psr\Container\ContainerInterface $c) => new {{baseNamespace}}Infrastructure\Api\Http\PipelineHandler(
+        new {{ baseNamespace }}Infrastructure\Api\Http\Pipeline([
+            {% if route.deserializer %}$c->get({{ baseNamespace }}{{ route.deserializer }}::class),{% else %}$c->get({{baseNamespace}}Infrastructure\Api\Http\EmptyDeserializer::class),{% endif %}
 
-    {% if route.deserializer %}$c->get({{ baseNamespace }}{{ route.deserializer }}::class),{% else %}$c->get({{baseNamespace}}Http\Pipeline\EmptyDeserializer::class),{% endif %}
-    $c->get({{baseNamespace}}{{ route.operation }}::class),
-    $c->get({{baseNamespace}}Http\Pipeline\JsonSerializer::class),
-    ])
+            $c->get({{baseNamespace}}{{ route.operation }}::class),
+            $c->get({{baseNamespace}}Infrastructure\Api\Http\JsonSerializer::class),
+        ])
     ),
 {% endfor %}
 ];

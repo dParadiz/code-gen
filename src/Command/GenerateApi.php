@@ -8,7 +8,7 @@ use cebe\openapi\ReferenceContext;
 use cebe\openapi\spec\OpenApi;
 use Dparadiz\Codegen\CodeWriter\TwigAdapter;
 use Dparadiz\Codegen\Encoder\OpenApiToPsr15;
-use Dparadiz\Codegen\Generator\StackProcessor;
+use Dparadiz\Codegen\Generator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -32,7 +32,8 @@ class GenerateApi extends Command
                 'Templates for code generation',
                 $defaultTemplatePath
             )
-            ->addOption('namespace', null, InputOption::VALUE_OPTIONAL, 'Namespace. Default Api', 'Api\\');
+            ->addOption('namespace', null, InputOption::VALUE_OPTIONAL, 'Namespace. Default Api', 'Api\\')
+            ->addOption('additional', 'a', InputOption::VALUE_OPTIONAL, 'Additional classes to generate relative to template folder');
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
@@ -52,8 +53,10 @@ class GenerateApi extends Command
 
         $configFolder = $input->getOption('output-config-folder') ?? '../config';
         $stack = (new OpenApiToPsr15\Encoder($configFolder))->encode($spec);
+       
+        $this->additionalClasses($input, $stack);
 
-        $stackProcessor = new StackProcessor(
+        $stackProcessor = new Generator\StackProcessor(
             new TwigAdapter((string)$input->getOption('templates')),
             $input->getOption('output-folder'),
             $input->getOption('namespace')
@@ -63,6 +66,35 @@ class GenerateApi extends Command
 
         $output->writeln('Code generation complete');
         return Command::SUCCESS;
+    }
+
+    private function additionalClasses(InputInterface $input, Generator\Stack $stack): void
+    {
+        $additionalClassesFolder = $input->getOption('additional');
+        if (!empty($additionalClassesFolder)) {
+            $additionalClassesFolder = (string)$input->getOption('templates') .'/'. $additionalClassesFolder;
+            $directory = new \RecursiveDirectoryIterator($additionalClassesFolder);
+            $iterator = new \RecursiveIteratorIterator($directory);
+
+            /** @var \SplFileInfo $info */
+            foreach ($iterator as $info) {
+                if ($info->isFile() && $info->getExtension() === 'twig') {
+
+                    $template = str_replace(
+                        [(string)$input->getOption('templates'), '.twig'], 
+                        ['', ''], 
+                        $info->getPathname()
+                    );
+
+                    $className = trim(str_replace(
+                        ['/', '.twig'], ['\\', ''],
+                        str_replace($additionalClassesFolder, '', $info->getPathname())
+                    ), '\\');
+
+                    $stack->push(new Generator\StackItem($template, $className));
+                }
+            }
+        }
     }
 
 }

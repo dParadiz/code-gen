@@ -13,10 +13,10 @@ use Dparadiz\Codegen\Generator\StackItem;
 
 readonly class Encoder implements EncoderInterface
 {
-    private const MODEL_NAMESPACE = 'Model';
-    private const OPERATION_NAMESPACE = 'Operation';
-    private const PARAMETER_NAMESPACE = 'Parameter';
-    private const DESERIALIZER_NAMESPACE = 'Deserializer';
+    private const MODEL_NAMESPACE = 'Infrastructure\Api\Model';
+    private const OPERATION_NAMESPACE = 'Infrastructure\Api\Operation';
+    private const PARAMETER_NAMESPACE = 'Infrastructure\Api\Parameter';
+    private const DESERIALIZER_NAMESPACE = 'Infrastructure\Api\Deserializer';
 
     private Encoder\Model $modelEncoder;
     private Encoder\RequestDeserializer $requestDeserializer;

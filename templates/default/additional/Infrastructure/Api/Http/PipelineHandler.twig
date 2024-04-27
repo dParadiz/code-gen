@@ -1,0 +1,19 @@
+<?php declare(strict_types=1);
+
+namespace {{baseNamespace}}Infrastructure\Api\Http;
+
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+
+final readonly class PipelineHandler implements RequestHandlerInterface
+{
+    public function __construct(private Pipeline $pipeline)
+    {
+    }
+
+    public function handle(ServerRequestInterface $request): ResponseInterface
+    {
+        return $this->pipeline->execute($request);
+    }
+}

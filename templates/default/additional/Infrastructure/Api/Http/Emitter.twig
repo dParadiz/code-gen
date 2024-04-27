@@ -1,0 +1,40 @@
+<?php declare(strict_types=1);
+
+namespace {{baseNamespace}}Infrastructure\Api\Http;
+
+use Psr\Http\Message\ResponseInterface;
+
+class Emitter implements EmitterInterface
+{
+    public function emit(ResponseInterface $response): void
+    {
+        if (headers_sent()) {
+            return;
+        }
+
+        $httpLine = sprintf(
+            'HTTP/%s %d %s',
+            (string) $response->getProtocolVersion(),
+            (int) $response->getStatusCode(),
+            (string) $response->getReasonPhrase()
+        );
+
+        header($httpLine, true, (int) $response->getStatusCode());
+
+        foreach ($response->getHeaders() as $name => $values) {
+            foreach ($values as $value) {
+                header("$name: $value", false);
+            }
+        }
+
+        $stream = $response->getBody();
+
+        if ($stream->isSeekable()) {
+            $stream->rewind();
+        }
+
+        while (!$stream->eof()) {
+            echo $stream->read(1024 * 8);
+        }
+    }
+}

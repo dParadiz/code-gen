@@ -1,0 +1,12 @@
+<?php declare(strict_types=1);
+
+namespace {{baseNamespace}}Infrastructure\Api\Http\Exception;
+
+class NotFoundException extends HttpException
+{
+      /** @var string */
+    protected $message = 'Not found';
+
+    /** @var int */
+    protected $code = 404;
+}
