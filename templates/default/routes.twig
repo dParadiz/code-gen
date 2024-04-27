@@ -1,0 +1,19 @@
+<?php
+declare(strict_types=1);
+
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+
+/**
+ * !!! auto generated - do not modify !!!
+ */
+return function (RoutingConfigurator $routes) {
+    {% for route in routes %}
+
+    $routes->add('api_{{route.operationId}}', '/services/rest{{route.path}}')
+       ->defaults([
+            'handler' => '{{route.handler}}',
+        ])
+        ->methods(['{{route.method}}']);
+
+    {% endfor %}
+};

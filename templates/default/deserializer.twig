@@ -1,0 +1,65 @@
+<?php
+declare(strict_types=1);
+
+namespace {{baseNamespace}}{{namespace}};
+
+use Psr\Http\Message\ServerRequestInterface;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Exception\MissingConstructorArgumentsException;
+use Symfony\Component\Serializer\Exception\NotEncodableValueException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use {{baseNamespace}}Http\Exception\BadRequest;
+use {{baseNamespace}}Http\Pipeline\Deserializer;
+use {{baseNamespace}}Parameter;
+use {{baseNamespace}}Model;
+
+class {{className}} implements Deserializer
+{
+    public function __construct(
+        private ValidatorInterface $validator,{% if requestBody %}
+        private Serializer $serializer,{% endif%}
+    ) {}
+
+    public function __invoke(ServerRequestInterface $request): array
+    {
+        $result = [];
+        {% for requestParam in requestParams %}
+
+        $params = {{requestParam}}::from($request);
+
+        $errors = $this->validator->validate($params);
+        if (count($errors) > 0) {
+            $messages = [];
+            foreach ($errors as $violation) {
+                $messages[] = $violation->getMessage();
+            }
+
+            throw new BadRequest(implode('\n', $messages));
+        }
+
+        $result[] = $params;
+        {% endfor%}
+        {% if requestBody %}
+
+        try {
+            $model = $this->serializer->deserialize($request->getBody()->getContents(), {{requestBody}}::class, 'json');
+        } catch (MissingConstructorArgumentsException|NotEncodableValueException $e) {
+            throw new BadRequest('Missing required data');
+        }
+
+        $errors = $this->validator->validate($model);
+        if (count($errors) > 0) {
+            $messages = [];
+            foreach ($errors as $violation) {
+                $messages[] = $violation->getMessage();
+            }
+
+            throw new BadRequest(implode('\n', $messages));
+        }
+
+        $result[] = $model;
+        {% endif%}
+
+        return $result;
+    }
+}

@@ -1,0 +1,14 @@
+<?php
+declare(strict_types=1);
+
+namespace {{baseNamespace}}{{namespace}};
+
+
+{% for import in imports %}
+use {{baseNamespace}}{{import}};
+{% endfor %}
+
+interface {{className}}
+{
+    public function __invoke({% if requestParams %}{{requestParams.type}} ${{requestParams.name}}, {% endif %}{% if requestBody %}}{{type}} ${{name}}{% endif %}): {{responseType}};
+}

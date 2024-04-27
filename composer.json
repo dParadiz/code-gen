@@ -1,17 +1,18 @@
 {
+  "name": "dparadiz/codegen",
   "autoload": {
     "psr-4": {
-      "Dparadiz\\Codegen\\": ""
+      "Dparadiz\\Codegen\\": "src/"
     }
   },
   "minimum-stability": "stable",
   "require": {
-    "php": "^8.1",
-    "cebe/php-openapi": "1.7.0",
-    "symfony/console": "6.1.*",
-    "mustache/mustache": "^2.13"
+    "php": "^8.2"  
   },
   "require-dev": {
-    "phpunit/phpunit": "^9"
+    "cebe/php-openapi": "1.7.0",
+    "symfony/console": "6.1.*",
+    "mustache/mustache": "^2.13",
+    "twig/twig": "^3.0"
   }
 }

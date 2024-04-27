@@ -1,0 +1,39 @@
+<?php
+declare(strict_types=1);
+
+namespace {{ baseNamespace }}{{ namespace }};
+
+{% for import in imports %}
+    use {{ baseNamespace }}{{ import }};
+{% endfor %}
+use Symfony\Component\Validator\Constraints as Assert;
+{% for attribute in attributes %}
+    #[ApiConstrain\{{ attribute }}]
+{% endfor %}
+final class {{ className }}
+{
+{% for propertie in properties %}
+    /**
+    * @var {{ propertie.docType }} ${{ propertie.name }}
+    {% for attribute in propertie.attributes %}
+        @{{ attribute }}
+    {% endfor %}
+    */
+    public {% if propertie.isNullable %}?{% endif %}{{ propertie.type }} ${{ propertie.name }};
+{% endfor %}
+
+/**
+{% for propertie in properties %}
+    * @param {{ propertie.docType }} ${{ propertie.name }}
+{% endfor %}
+*/
+public function __construct(
+{% for propertie in properties %}
+    {% if propertie.isNullable %}?{% endif %}{{ propertie.type }} ${{ propertie.name }}{% if propertie.defaultValue %} = {{ propertie.defaultValue }}{% endif %},
+{% endfor %}
+) {
+{% for propertie in properties %}
+    $this->{{ propertie.name }} = ${{ propertie.name }};
+{% endfor %}
+}
+}

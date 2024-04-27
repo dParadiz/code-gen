@@ -1,0 +1,22 @@
+<?php
+
+/**
+* !!! auto generated - do not modify !!!
+*/
+return [
+{{baseNamespace}}Http\Pipeline\JsonSerializer::class => DI\autowire(),
+{% for service in services %}
+    {{baseNamespace}}{{ services }}::class => DI\autowire(),
+{% endfor %}
+{% for route in routes %}
+
+    '{{ route.handler }}' => fn(Psr\Container\ContainerInterface $c) => new {{baseNamespace}}Http\Handler\PipelineHandler(
+    new {{ baseNamespace }}\Http\Pipeline([
+
+    {% if route.deserializer %}$c->get({{ baseNamespace }}{{ route.deserializer }}::class),{% else %}$c->get({{baseNamespace}}Http\Pipeline\EmptyDeserializer::class),{% endif %}
+    $c->get({{baseNamespace}}{{ route.operation }}::class),
+    $c->get({{baseNamespace}}Http\Pipeline\JsonSerializer::class),
+    ])
+    ),
+{% endfor %}
+];

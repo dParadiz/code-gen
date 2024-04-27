@@ -1,0 +1,89 @@
+<?php
+declare(strict_types=1);
+
+namespace {{baseNamespace}}{{namespace}};
+
+use Psr\Http\Message\ServerRequestInterface;
+{% for import in imports %}
+    use {{baseNamespace}}{{import}};
+{% endfor %}
+use Symfony\Component\Validator\Constraints as Assert;
+use {{baseNamespace}}Http\Exception\BadRequest;
+
+final class {{className}}
+{
+
+{% for parameter in parameters %}
+
+
+    {%  for attribute in attributes %}
+    #[{{attribute}}]
+    {% endfor %}
+    public {% if not parameter.required %}?{% endif %}{{parameter.type}} ${{parameter.name}};
+{% endfor %}
+
+    public static function from(ServerRequestInterface $request): {{className}}
+    {
+        $parameters = new {{className}};
+        $matches = [];
+
+        {% if  regexMatch%}
+        preg_match('{{{regexMatch}}}', $request->getUri()->getPath(), $matches);
+        {% endif %}
+
+
+        {%  for parameter in paramters %}
+            {% if parameter.required %}
+
+                {% if parameter.inQuery %}
+                if (!isset($request->getQueryParams()['{{parameter.name}}'])) {
+                    throw new BadRequest('Query parameter {{parameter.name}} is required');
+                }
+                {%  endif %}
+                {% if parameter.inPath %}
+
+                if (!isset($matches['{{parameter.name}}'])) {
+                    throw new BadRequest('Query parameter {{parameter.name}} is required');
+                }
+                {%  endif %}
+            {% endif %}
+
+            {% if parameter.inQuery %}
+                {% if parameter.useEnum %}
+
+                {% if parameter.required %}
+                    ${{parameter.name}} = {{parameter.type}}::tryFrom($request->getQueryParams()['{{parameter.name}}']);
+                    if (!is_null(${{parameter.name}})) {
+                        $parameters->{{parameter.name}} = ${{parameter.name}};
+                    } else {
+                        throw new BadRequest('Query parameter {{parameter.name}} is invalid');
+                    }
+                {% else %}
+
+                    ${{parameter.name}} = $request->getQueryParams()['{{parameter.name}}'] ?? null;
+                    if (!is_null(${{parameter.name}})) {
+                        ${{parameter.name}} = {{parameter.type}}::tryFrom(${{name}});
+                        if (!is_null(${{parameter.name}})) {
+                            $parameters->{{parameter.name}} = ${{parameter.name}};
+                        } else {
+                            throw new BadRequest('Query parameter {{parameter.name}} is invalid');
+                        }
+                    } else {
+                        $parameters->{{parameter.name}} = null;
+                    }
+                {% endif %}
+            {% else %}
+
+                $parameters->{{parameter.name}} = $request->getQueryParams()['{{parameter.name}}']{% if not required %} ?? null{% endif %};
+            {% endif %}
+        {% endif %}
+
+            {% if parameter.inPath %}
+
+        $parameters->{{parameter.name}} = urldecode($matches['{{parameter.name}}']){% if not required %} ?? null{% endif %};
+        {% endif %}
+        {% endfor %}
+
+        return $parameters;
+    }
+}

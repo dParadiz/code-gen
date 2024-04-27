@@ -1,0 +1,11 @@
+<?php
+
+
+/**
+* !!! auto generated - do not modify !!!
+*/
+return [
+{% for operation in operations %}
+    {{ baseNamespace }}{{ operation.namespace }}\{{ operation.className }}::class => fn() => throw new RuntimeException('Not implemented'),
+{% endfor %}
+];

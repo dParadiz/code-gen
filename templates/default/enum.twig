@@ -1,0 +1,11 @@
+<?php
+declare(strict_types=1);
+
+namespace {{ baseNamespace }}{{ namespace }};
+
+enum {{ className }}: {{ type }}
+{
+{% for enum in enums %}
+    case {{ enum.name }} = {% if enum.isString %}'{% endif %}{{ enum.value }}{% if enum.isString %}'{% endif %};
+{% endfor %}
+}
